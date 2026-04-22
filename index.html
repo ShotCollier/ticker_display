@@ -4,11 +4,15 @@
   <meta charset="utf-8">
   <title>Draft Ticker</title>
   <style>
+    :root {
+      --loop-distance: 0px;
+      --duration: 110s;
+    }
+
     body {
       margin: 0;
-      background: transparent !important;
       overflow: hidden;
-      color: white !important;
+      background: transparent;
       font-family: Arial, sans-serif;
     }
 
@@ -26,30 +30,34 @@
       display: flex;
       width: max-content;
       will-change: transform;
-      animation: scroll 75s linear infinite;
+      animation: marquee var(--duration) linear infinite;
+      transform: translate3d(0,0,0);
     }
 
     .ticker-copy {
       flex: 0 0 auto;
       white-space: nowrap;
-      padding-right: 120px;
+      padding-right: 140px;
       font-size: 60px;
       font-weight: 800;
-      color: white !important;
-      -webkit-text-fill-color: white !important;
+      color: white;
+      -webkit-text-fill-color: white;
       text-shadow:
         0 0 3px #fff,
         0 0 6px rgba(255,255,255,0.8);
     }
 
-    @keyframes scroll {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-50%); }
+    @keyframes marquee {
+      from {
+        transform: translate3d(0,0,0);
+      }
+      to {
+        transform: translate3d(calc(-1 * var(--loop-distance)),0,0);
+      }
     }
   </style>
 </head>
 <body>
-
   <div class="wrapper">
     <div class="track" id="track">
       <div class="ticker-copy" id="copy1"></div>
@@ -58,33 +66,48 @@
   </div>
 
   <script>
-    const API_URL =
-      "https://script.google.com/macros/s/AKfycbxua5n-LD77Kl19na_JmIsEX1FXzfs9HE5gUQlhfBVdUYTCtdFlnOeKtmSYiTBxeVl0/exec";
-
+    const API_URL = "https://script.google.com/macros/s/AKfycbxua5n-LD77Kl19na_JmIsEX1FXzfs9HE5gUQlhfBVdUYTCtdFlnOeKtmSYiTBxeVl0/exec";
     let lastText = "";
 
     function buildLongBase(base) {
       let text = base.trim();
-      while (text.length < 500) {
+      while (text.length < 700) {
         text += " • " + base.trim();
       }
       return text;
     }
 
+    function resetAnimation() {
+      const track = document.getElementById("track");
+      track.style.animation = "none";
+      void track.offsetWidth;
+      track.style.animation = "";
+    }
+
+    function applyTicker(base) {
+      const longText = buildLongBase(base);
+      const copy1 = document.getElementById("copy1");
+      const copy2 = document.getElementById("copy2");
+
+      copy1.innerText = longText;
+      copy2.innerText = longText;
+
+      requestAnimationFrame(() => {
+        const loopWidth = copy1.offsetWidth;
+        document.documentElement.style.setProperty("--loop-distance", loopWidth + "px");
+        resetAnimation();
+      });
+    }
+
     async function loadTicker() {
       try {
-        const res = await fetch(API_URL);
+        const res = await fetch(API_URL, { cache: "no-store" });
         const data = await res.json();
+        const base = (data.ticker || "").trim();
 
-        let base = (data.ticker || "").trim();
         if (!base) return;
-
         if (base !== lastText) {
-          const longText = buildLongBase(base);
-
-          document.getElementById("copy1").innerText = longText;
-          document.getElementById("copy2").innerText = longText;
-
+          applyTicker(base);
           lastText = base;
         }
       } catch (e) {
@@ -93,8 +116,7 @@
     }
 
     loadTicker();
-    setInterval(loadTicker, 10000);
+    setInterval(loadTicker, 30000);
   </script>
-
 </body>
 </html>
