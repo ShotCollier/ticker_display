@@ -42,17 +42,25 @@
     <div id="ticker" class="ticker"></div>
   </div>
 
-  <script>
-    // HARD TEST (no fetch, no external dependencies)
-    const el = document.getElementById("ticker");
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxua5n-LD77Kl19na_JmIsEX1FXzfs9HE5gUQlhfBVdUYTCtdFlnOeKtmSYiTBxeVl0/exec";
 
-    if (el) {
-      el.innerText =
-        "TRAVIS HUNTER (CB, COLORADO) • WILL JOHNSON (CB, MICHIGAN) • KELVIN BANKS (OT, TEXAS)";
-    } else {
-      document.body.innerHTML = "ELEMENT NOT FOUND";
-    }
-  </script>
+async function loadTicker() {
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+
+    document.getElementById("ticker").innerText = data.ticker;
+
+  } catch (e) {
+    document.getElementById("ticker").innerText =
+      "LOADING DRAFT DATA...";
+  }
+}
+
+loadTicker();
+setInterval(loadTicker, 5000);
+</script>
 
 </body>
 </html>
