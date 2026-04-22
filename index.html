@@ -42,34 +42,10 @@ body {
 </div>
 
 <script>
-const SHEET_URL =
-"https://docs.google.com/spreadsheets/d/1nf9wRR_x5D9n2vH-Bm4fihU1rxx5V4XA5fBKfVvo4wA/gviz/tq?tqx=out:csv&sheet=TickerData&range=F2";
-
-async function loadTicker() {
-  try {
-    const res = await fetch(SHEET_URL);
-    let text = await res.text();
-
-    // Clean CSV output properly
-    text = text
-      .replace(/"/g, "")
-      .replace(/(\r\n|\n|\r)/gm, "")
-      .trim();
-
-    // Debug (VERY IMPORTANT)
-    console.log("Ticker Data:", text);
-
-    document.getElementById("ticker").innerText = text;
-
-  } catch (err) {
-    console.error(err);
-    document.getElementById("ticker").innerText =
-      "FAILED TO LOAD SHEET DATA";
-  }
-}
-
-loadTicker();
-setInterval(loadTicker, 5000);
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("ticker").innerText =
+    "TRAVIS HUNTER (CB, COLORADO) • WILL JOHNSON (CB, MICHIGAN) • KELVIN BANKS (OT, TEXAS)";
+});
 </script>
 
 </body>
