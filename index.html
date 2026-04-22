@@ -23,7 +23,7 @@ body {
 .ticker {
   display: inline-block;
   padding-left: 100%;
-  animation: scroll 50s linear infinite;
+  animation: scroll 55s linear infinite;
 
   font-size: 44px !important;
   font-weight: 800 !important;
@@ -64,7 +64,7 @@ async function loadTicker() {
     let text = data.ticker || "";
 
     // 🔥 DUPLICATE FOR SEAMLESS LOOP
-    text = text + " • " + text;
+    text = text + " • " + text + " • " + text;
 
     document.getElementById("ticker").innerText = text;
 
