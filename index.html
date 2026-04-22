@@ -1,0 +1,37 @@
+<html>
+<head>
+<style>
+body {
+  margin: 0;
+  background: transparent;
+  overflow: hidden;
+  color: white;
+  font-size: 28px;
+  white-space: nowrap;
+}
+
+.ticker {
+  display: inline-block;
+  animation: scroll 20s linear infinite;
+}
+
+@keyframes scroll {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+</style>
+</head>
+
+<body>
+<div class="ticker" id="ticker">Loading...</div>
+
+<script>
+fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vTpOOWrwo3WVX3z4wzQ9TW7SugZU1Yy1CJrSYqHMyq1-5pICt6sD9KGfDB4t6NsJidlcNIaMh61P7X_/pubhtml?gid=52329695&single=true")
+  .then(r => r.text())
+  .then(data => {
+    document.getElementById("ticker").innerText = data;
+  });
+</script>
+
+</body>
+</html>
