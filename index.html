@@ -1,36 +1,74 @@
+<!DOCTYPE html>
 <html>
 <head>
 <style>
 body {
   margin: 0;
-  background: transparent;
   overflow: hidden;
+  background: transparent;
+  font-family: Arial;
+}
+
+.wrapper {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: black;
   color: white;
   font-size: 28px;
   white-space: nowrap;
+  overflow: hidden;
+  height: 60px;
+  display: flex;
+  align-items: center;
 }
 
 .ticker {
   display: inline-block;
+  padding-left: 100%;
   animation: scroll 20s linear infinite;
 }
 
 @keyframes scroll {
-  0% { transform: translateX(100%); }
+  0% { transform: translateX(0); }
   100% { transform: translateX(-100%); }
 }
 </style>
 </head>
 
 <body>
-<div class="ticker" id="ticker">Loading...</div>
+
+<div class="wrapper">
+  <div class="ticker" id="ticker">Loading draft board...</div>
+</div>
 
 <script>
-fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vTpOOWrwo3WVX3z4wzQ9TW7SugZU1Yy1CJrSYqHMyq1-5pICt6sD9KGfDB4t6NsJidlcNIaMh61P7X_/pubhtml?gid=52329695&single=true")
-  .then(r => r.text())
-  .then(data => {
-    const lines = data.split("\n");
-    document.getElementById("ticker").innerText = lines[0];
-  });
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpOOWrwo3WVX3z4wzQ9TW7SugZU1Yy1CJrSYqHMyq1-5pICt6sD9KGfDB4t6NsJidlcNIaMh61P7X_/pubhtml?gid=52329695&single=true";
 
+async function loadTicker() {
+  try {
+    const res = await fetch(SHEET_URL);
+    const text = await res.text();
+
+    // Google Sheets returns CSV → take first row
+    let line = text.split("\n")[0];
+
+    // Clean formatting
+    line = line.replace(/,/g, " • ");
+
+    document.getElementById("ticker").innerText = line;
+
+  } catch (e) {
+    document.getElementById("ticker").innerText =
+      "DRAFT DATA LOADING ERROR";
+  }
+}
+
+loadTicker();
+
+// auto-refresh every 5 seconds (THIS IS KEY)
+setInterval(loadTicker, 5000);
 </script>
+
+</body>
+</html>
