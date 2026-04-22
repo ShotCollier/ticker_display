@@ -4,11 +4,6 @@
   <meta charset="utf-8">
   <title>Draft Ticker</title>
   <style>
-    :root {
-      --loop-distance: 0px;
-      --duration: 110s;
-    }
-
     body {
       margin: 0;
       overflow: hidden;
@@ -17,20 +12,21 @@
     }
 
     .wrapper {
-      width: 100%;
+      width: 100vw;
       height: 120px;
+      overflow: hidden;
       display: flex;
       align-items: center;
-      overflow: hidden;
       white-space: nowrap;
       background: transparent;
+      position: relative;
     }
 
     .track {
       display: flex;
-      width: max-content;
+      flex-wrap: nowrap;
+      white-space: nowrap;
       will-change: transform;
-      animation: marquee var(--duration) linear infinite;
       transform: translate3d(0,0,0);
     }
 
@@ -40,20 +36,11 @@
       padding-right: 140px;
       font-size: 60px;
       font-weight: 800;
-      color: white;
-      -webkit-text-fill-color: white;
+      color: white !important;
+      -webkit-text-fill-color: white !important;
       text-shadow:
         0 0 3px #fff,
         0 0 6px rgba(255,255,255,0.8);
-    }
-
-    @keyframes marquee {
-      from {
-        transform: translate3d(0,0,0);
-      }
-      to {
-        transform: translate3d(calc(-1 * var(--loop-distance)),0,0);
-      }
     }
   </style>
 </head>
@@ -67,7 +54,12 @@
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxua5n-LD77Kl19na_JmIsEX1FXzfs9HE5gUQlhfBVdUYTCtdFlnOeKtmSYiTBxeVl0/exec";
+
     let lastText = "";
+    let offset = 0;
+    let pxPerSecond = 45; // smaller = slower
+    let lastFrameTime = null;
+    let loopWidth = 0;
 
     function buildLongBase(base) {
       let text = base.trim();
@@ -77,25 +69,16 @@
       return text;
     }
 
-    function resetAnimation() {
-      const track = document.getElementById("track");
-      track.style.animation = "none";
-      void track.offsetWidth;
-      track.style.animation = "";
-    }
-
     function applyTicker(base) {
       const longText = buildLongBase(base);
       const copy1 = document.getElementById("copy1");
       const copy2 = document.getElementById("copy2");
 
-      copy1.innerText = longText;
-      copy2.innerText = longText;
+      copy1.textContent = longText;
+      copy2.textContent = longText;
 
       requestAnimationFrame(() => {
-        const loopWidth = copy1.offsetWidth;
-        document.documentElement.style.setProperty("--loop-distance", loopWidth + "px");
-        resetAnimation();
+        loopWidth = copy1.offsetWidth;
       });
     }
 
@@ -106,6 +89,7 @@
         const base = (data.ticker || "").trim();
 
         if (!base) return;
+
         if (base !== lastText) {
           applyTicker(base);
           lastText = base;
@@ -115,8 +99,32 @@
       }
     }
 
+    function animate(timestamp) {
+      const track = document.getElementById("track");
+
+      if (lastFrameTime === null) {
+        lastFrameTime = timestamp;
+      }
+
+      const delta = (timestamp - lastFrameTime) / 1000;
+      lastFrameTime = timestamp;
+
+      if (loopWidth > 0) {
+        offset += pxPerSecond * delta;
+
+        if (offset >= loopWidth) {
+          offset -= loopWidth;
+        }
+
+        track.style.transform = `translate3d(${-offset}px, 0, 0)`;
+      }
+
+      requestAnimationFrame(animate);
+    }
+
     loadTicker();
     setInterval(loadTicker, 30000);
+    requestAnimationFrame(animate);
   </script>
 </body>
 </html>
